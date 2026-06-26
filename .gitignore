@@ -1,0 +1,14 @@
+# 金鑰，千萬別上傳
+.env
+
+# 編輯器 / 本機工具設定、雜物，不用上傳
+.claude/
+files.zip
+
+# 注意：digest.db 故意「不」忽略，要讓 GitHub Actions 每天把歷史 commit 回 repo
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/

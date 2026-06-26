@@ -1,0 +1,5 @@
+feedparser
+requests
+google-genai
+anthropic
+python-dotenv

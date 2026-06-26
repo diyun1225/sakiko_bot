@@ -1,0 +1,37 @@
+name: daily-digest
+
+on:
+  schedule:
+    # 注意：GitHub Actions 的 cron 一律用 UTC 時間！台灣 = UTC+8
+    # 想要「台灣早上 8:00」收到 → 對應 UTC 00:00 → 寫成下面這樣
+    - cron: "0 0 * * *"
+  workflow_dispatch:   # 允許在 GitHub 網頁手動按一下，方便測試
+
+# 讓這個 workflow 有權限把 digest.db commit 回 repo
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: python daily_digest.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+
+      # 把今天累積的資料庫存回 repo，這樣歷史才會一天天累積
+      - name: 把資料庫存回 repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add digest.db
+          git commit -m "更新每日摘要資料庫" || echo "資料庫沒有變更，略過 commit"
+          git push
